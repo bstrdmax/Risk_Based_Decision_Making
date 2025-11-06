@@ -1,0 +1,5 @@
+{
+  "name": "AI Risk-Based Decision Tool",
+  "description": "An AI-powered assistant to help professionals make informed, data-driven decisions while adhering to GAO Greenbook and OMB Circular A-123, guiding users through a structured risk assessment process.",
+  "requestFramePermissions": []
+}
