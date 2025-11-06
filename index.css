@@ -1,0 +1,101 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  font-family: 'Inter', sans-serif;
+}
+@media print {
+  @page {
+    size: A4;
+    margin: 1.5cm;
+  }
+
+  /* --- START: Print Remap & Rescope Strategy --- */
+
+  /* 1. Hide all non-printable elements */
+  .non-printable {
+    display: none !important;
+  }
+
+  /* 2. Reset the layout of the main containers to prevent them from constraining the printed content.
+      This is the core of the fix, removing max-width, flexbox, padding, etc. from the app shell. */
+  body, #root, #root > div, main {
+    all: initial !important;
+    background-color: #fff !important;
+    font-family: 'Inter', sans-serif !important; /* Re-apply base font */
+    -webkit-print-color-adjust: exact !important; /* Ensure colors print */
+    print-color-adjust: exact !important;
+  }
+
+  /* 3. Ensure the printable area itself has no screen-specific layout constraints. */
+  .printable-area {
+    box-shadow: none !important;
+    border: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  /* 4. Reset Tailwind's Typography ('prose') plugin for full-page width printing. */
+  .prose {
+    max-width: none !important;
+    color: #000 !important;
+  }
+  .prose h1, .prose h2, .prose h3, .prose h4, .prose strong {
+      color: #000 !important;
+  }
+  .prose a {
+      color: #0000EE !important;
+      text-decoration: underline !important;
+  }
+  .prose code, .prose li, .prose p { color: #000 !important; }
+  .dark-print\\:text-black { color: #000 !important; } /* Ensure dark mode text override */
+  
+  /* 5. Re-apply essential styles for report elements within the new print context */
+  
+  /* Table Styles */
+  table {
+    width: 100% !important;
+    border-collapse: collapse !important;
+    page-break-inside: avoid;
+  }
+  th, td {
+    border: 1px solid #ddd !important;
+    padding: 8px !important;
+    text-align: left !important;
+  }
+  thead {
+    display: table-header-group !important; /* Ensures header repeats on each page */
+    background-color: #f3f4f6 !important;
+  }
+
+  /* Risk Tag Styles */
+  .print-tag {
+    display: inline-flex !important;
+    align-items: center !important;
+    padding: 2px 8px !important;
+    border-radius: 9999px !important;
+    font-size: 0.75rem !important;
+    font-weight: 500 !important;
+    border: 1px solid #ccc !important;
+  }
+  .print-tag svg {
+    width: 0.75rem !important;
+    height: 0.75rem !important;
+    margin-right: 4px !important;
+  }
+  .risk-tag-financial { background-color: #D1FAE5 !important; color: #065F46 !important; }
+  .risk-tag-operational { background-color: #DBEAFE !important; color: #1E40AF !important; }
+  .risk-tag-strategic { background-color: #E9D5FF !important; color: #5B21B6 !important; }
+  .risk-tag-compliance { background-color: #FEF3C7 !important; color: #92400E !important; }
+
+  /* Page Break Control */
+  h1, h2, h3, h4, thead {
+    page-break-after: avoid;
+    page-break-inside: avoid;
+  }
+  ul, ol, li, p, img, blockquote {
+    page-break-inside: avoid;
+  }
+  /* --- END: Print Remap & Rescope Strategy --- */
+}
