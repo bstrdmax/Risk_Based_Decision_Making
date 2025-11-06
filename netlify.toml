@@ -1,12 +1,16 @@
 [build]
-  # This tells Netlify that your site is pre-built and ready to be deployed.
-  # The root directory (".") contains all the files to be published.
-  publish = "."
+  # This command tells Netlify to run the build script from package.json
+  command = "npm run build"
+  
+  # This is the folder where Vite places the final, optimized website files.
+  publish = "dist"
+
+  # This tells Netlify where your serverless function is located.
+  functions = "netlify/functions"
 
 [[redirects]]
-  # This rule is essential for single-page applications. It ensures that
-  # any direct navigation or page refresh is handled by your index.html,
-  # preventing 404 errors.
+  # This is a standard rule for Single-Page Applications like yours.
+  # It makes sure that browser routing and page refreshes work correctly.
   from = "/*"
   to = "/index.html"
   status = 200
