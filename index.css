@@ -85,9 +85,7 @@ body {
     print-color-adjust: exact !important;
   }
   .print-tag svg {
-    width: 0.75rem !important;
-    height: 0.75rem !important;
-    margin-right: 4px !important;
+    display: none !important; /* Hide SVGs in print as they may not render well */
   }
   .risk-tag-financial { background-color: #dcfce7 !important; color: #166534 !important; }
   .risk-tag-operational { background-color: #dbeafe !important; color: #1e40af !important; }
