@@ -5,6 +5,7 @@ import Header from './components/Header';
 import DecisionForm from './components/DecisionForm';
 import ReportView from './components/ReportView';
 import SpinnerIcon from './components/icons/SpinnerIcon';
+import WelcomeView from './components/WelcomeView';
 import { ReportResult } from './services/geminiService';
 
 const LOADING_MESSAGES = [
@@ -17,7 +18,7 @@ const LOADING_MESSAGES = [
 ];
 
 const App: React.FC = () => {
-  const [view, setView] = useState<'form' | 'report' | 'loading'>('form');
+  const [view, setView] = useState<'welcome' | 'form' | 'report' | 'loading'>('welcome');
   const [answers, setAnswers] = useState<string[]>(Array(QUESTIONS.length).fill(''));
   const [reportData, setReportData] = useState<ReportResult | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -26,8 +27,7 @@ const App: React.FC = () => {
   const [loadingMessageIndex, setLoadingMessageIndex] = useState(0);
 
   useEffect(() => {
-    // FIX: In a browser environment, `setInterval` returns a `number`. `NodeJS.Timeout` is for Node.js.
-    let interval: number;
+    let interval: ReturnType<typeof setInterval>;
     if (view === 'loading') {
       interval = setInterval(() => {
         setLoadingMessageIndex((prevIndex) => (prevIndex + 1) % LOADING_MESSAGES.length);
@@ -40,6 +40,10 @@ const App: React.FC = () => {
     const newAnswers = [...answers];
     newAnswers[index] = value;
     setAnswers(newAnswers);
+  };
+  
+  const handleStart = () => {
+    setView('form');
   };
 
   const handleNext = () => {
@@ -59,7 +63,7 @@ const App: React.FC = () => {
     setReportData(null);
     setError(null);
     setCurrentStep(0);
-    setView('form');
+    setView('welcome');
   };
 
   const handleReviseAnswer = async (index: number) => {
@@ -115,6 +119,8 @@ const App: React.FC = () => {
 
   const renderContent = () => {
     switch (view) {
+      case 'welcome':
+        return <WelcomeView onStart={handleStart} />;
       case 'loading':
         return (
           <div className="flex-1 flex flex-col items-center justify-center text-center p-8">
