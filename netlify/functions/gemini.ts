@@ -96,19 +96,19 @@ const handler: Handler = async (event: HandlerEvent): Promise<HandlerResponse> =
         return response;
 
     } catch (error) {
-        console.error("Error during API request processing:", error);
-        
-        let errorMessage = "An unexpected error occurred while processing your request.";
+        console.error("Error in Netlify function:", JSON.stringify(error, null, 2));
+
+        let errorMessage = "An unexpected server error occurred.";
         let statusCode = 500;
 
         if (error instanceof Error) {
+            errorMessage = error.message;
+            // Try to infer status code from common error messages for more accurate client-side handling
             const msg = error.message.toLowerCase();
             if (msg.includes("permission") || msg.includes("denied") || msg.includes("api key not valid")) {
                 statusCode = 401;
-                errorMessage = "Authentication with the AI service failed. Please check the configured API key.";
             } else if (msg.includes("quota")) {
                 statusCode = 429;
-                errorMessage = "The service usage limit has been reached. Please try again later.";
             } else if (error.name === 'SyntaxError') { // From JSON.parse
                 statusCode = 400;
                 errorMessage = "Invalid request format."
