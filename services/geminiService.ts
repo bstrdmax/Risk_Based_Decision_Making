@@ -44,8 +44,8 @@ export const generateFinalReport = async (prompt: string): Promise<ReportResult>
         return result as ReportResult;
     } catch (error) {
         console.error("Error generating final report via proxy:", error);
-        // Re-throw a user-friendly message
-        throw new Error("Failed to communicate with the AI model for the final report.");
+        // Re-throw the original, detailed error for the UI to display.
+        throw error;
     }
 };
 
@@ -61,7 +61,7 @@ export const reviseAnswer = async (question: string, context: string, userAnswer
         return result.revisedText;
     } catch (error) {
         console.error("Error revising answer via proxy:", error);
-        // Re-throw a user-friendly message
-        throw new Error("Failed to communicate with the AI model for a revision.");
+        // Re-throw the original, detailed error for the UI to display.
+        throw error;
     }
 };
