@@ -4,6 +4,7 @@ import MarkdownRenderer from './MarkdownRenderer';
 import CopyIcon from './icons/CopyIcon';
 import DownloadIcon from './icons/DownloadIcon';
 import PrintIcon from './icons/PrintIcon';
+import CheckIcon from './icons/CheckIcon';
 
 interface ReportViewProps {
   reportData: ReportResult;
@@ -11,7 +12,7 @@ interface ReportViewProps {
 }
 
 const ReportView: React.FC<ReportViewProps> = ({ reportData, onReset }) => {
-  const [copyStatus, setCopyStatus] = useState('Copy');
+  const [copyStatus, setCopyStatus] = useState<'Copy' | 'Copied!' | 'Failed!'>('Copy');
   const reportDate = new Date().toLocaleDateString('en-US', {
     year: 'numeric',
     month: 'long',
@@ -54,9 +55,9 @@ const ReportView: React.FC<ReportViewProps> = ({ reportData, onReset }) => {
         <div className="flex items-center space-x-2 p-1 bg-slate-200/50 dark:bg-slate-800/50 rounded-lg">
             <button 
                 onClick={handleCopy}
-                className="flex items-center space-x-1.5 px-3 py-1.5 text-sm font-medium text-slate-600 dark:text-slate-300 bg-white dark:bg-slate-700/50 border border-transparent rounded-md hover:bg-slate-50 dark:hover:bg-slate-700 hover:text-slate-800 dark:hover:text-slate-100 transition-colors"
+                className={`flex items-center space-x-1.5 px-3 py-1.5 text-sm font-medium text-slate-600 dark:text-slate-300 bg-white dark:bg-slate-700/50 border border-transparent rounded-md hover:bg-slate-50 dark:hover:bg-slate-700 hover:text-slate-800 dark:hover:text-slate-100 transition-all ${copyStatus === 'Copied!' ? '!bg-green-100 dark:!bg-green-800/50 !text-green-700 dark:!text-green-200' : ''}`}
             >
-                <CopyIcon />
+                {copyStatus === 'Copied!' ? <CheckIcon /> : <CopyIcon />}
                 <span className="w-12 text-left">{copyStatus}</span>
             </button>
             <button 
