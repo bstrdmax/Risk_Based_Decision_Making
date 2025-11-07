@@ -3,6 +3,7 @@ import { QUESTIONS } from '../constants';
 import SparkleIcon from './icons/SparkleIcon';
 import SpinnerIcon from './icons/SpinnerIcon';
 import ProgressIndicator from './ProgressIndicator';
+import RestartIcon from './icons/RestartIcon';
 
 interface DecisionFormProps {
   currentStep: number;
@@ -12,6 +13,7 @@ interface DecisionFormProps {
   onNext: () => void;
   onBack: () => void;
   onSubmit: () => void;
+  onReset: () => void;
   revisionLoading: Record<number, boolean>;
   error: string | null;
 }
@@ -24,6 +26,7 @@ const DecisionForm: React.FC<DecisionFormProps> = ({
   onNext,
   onBack,
   onSubmit,
+  onReset,
   revisionLoading,
   error,
 }) => {
@@ -41,7 +44,17 @@ const DecisionForm: React.FC<DecisionFormProps> = ({
 
   return (
     <div className="w-full flex-1 flex items-center justify-center p-4 sm:p-6 lg:p-8">
-      <div className="w-full max-w-4xl bg-white dark:bg-slate-800/50 rounded-2xl shadow-xl border border-slate-200 dark:border-slate-700 p-6 sm:p-8 md:p-12 flex flex-col">
+      <div className="w-full max-w-4xl bg-white dark:bg-slate-800/50 rounded-2xl shadow-xl border border-slate-200 dark:border-slate-700 p-6 sm:p-8 md:p-12 flex flex-col relative">
+        
+        <button 
+          onClick={onReset}
+          className="absolute top-4 right-4 flex items-center space-x-2 px-3 py-1.5 text-sm font-medium text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700/50 rounded-full transition-colors"
+          title="Start a new analysis from scratch"
+        >
+          <RestartIcon />
+          <span>Start Over</span>
+        </button>
+
         <div className="text-center mb-10">
           <h2 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-gray-100">New Decision Analysis</h2>
           <p className="text-slate-500 dark:text-slate-400 mt-2">Follow the steps below to analyze your decision.</p>
