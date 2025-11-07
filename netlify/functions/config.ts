@@ -11,11 +11,7 @@
  * @throws An error if the API key is not configured on the server.
  */
 export function getApiKey(): string {
-    // FIX: The coding guidelines require using the `API_KEY` environment variable.
-    // This prevents the literal string from appearing in the bundled source code.
-    const keyName = ['A', 'P', 'I', '_', 'K', 'E', 'Y'].join('');
-    
-    const apiKey = process.env[keyName];
+    const apiKey = process.env.API_KEY;
 
     if (!apiKey) {
         // Throw a specific, non-descriptive error to be caught by the generic error handler.
