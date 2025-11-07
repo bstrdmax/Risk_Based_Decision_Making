@@ -1,6 +1,6 @@
 import { GoogleGenAI } from "@google/genai";
 import type { Handler, HandlerEvent, HandlerResponse } from "@netlify/functions";
-import { SYSTEM_PROMPT, REVISION_SYSTEM_PROMPT } from '../constants';
+import { SYSTEM_PROMPT, REVISION_SYSTEM_PROMPT } from '../../constants';
 import { getApiKey } from './config';
 
 let ai: GoogleGenAI;
