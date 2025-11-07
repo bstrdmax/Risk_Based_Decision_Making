@@ -1,0 +1,18 @@
+# This file configures the build and deploy settings for Netlify.
+
+[build]
+  # Command to build the Vite site. This comes from your package.json.
+  command = "npm run build"
+  
+  # The directory where the built site assets are located. Vite's default is "dist".
+  publish = "dist"
+  
+  # The directory where the serverless functions are located.
+  functions = "netlify/functions"
+
+# This redirects all paths to the index.html, which is standard for a 
+# single-page application (SPA) like one built with React and Vite.
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
