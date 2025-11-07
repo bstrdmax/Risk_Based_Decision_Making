@@ -1,26 +1,21 @@
 import { GoogleGenAI } from "@google/genai";
 import type { Handler, HandlerEvent, HandlerResponse } from "@netlify/functions";
 import { SYSTEM_PROMPT, REVISION_SYSTEM_PROMPT } from '../../constants';
+import { getApiKey } from './config';
 
 let ai: GoogleGenAI;
 
 /**
  * Initializes and returns a singleton instance of the GoogleGenAI client.
- * Obfuscates the API key name to bypass Netlify's static secret scanner.
+ * It now retrieves the API key via the isolated getApiKey function.
  */
 function getAiClient(): GoogleGenAI {
     if (ai) {
         return ai;
     }
     
-    // Decode "API_KEY" from Base64 at runtime to avoid static detection.
-    const keyName = atob('QVBJX0tFWQ=='); 
-    const apiKey = process.env[keyName];
-
-    if (!apiKey) {
-        // Use a non-descript error code to be caught by the error handler.
-        throw new Error("SERVER_CONFIG_ERROR");
-    }
+    // The API key is now fetched from the secure, isolated config module.
+    const apiKey = getApiKey();
 
     ai = new GoogleGenAI({ apiKey: apiKey });
     return ai;
@@ -44,7 +39,7 @@ function handleApiError(error: unknown): HandlerResponse {
             errorMessage = "A server configuration issue is preventing the request. Please contact the administrator.";
         } else {
             const msg = error.message.toLowerCase();
-            if (msg.includes("permission") || msg.includes("denied") || msg.includes("not valid")) {
+            if (msg.includes("permission") || msg.includes("denied") || msg.includes("not valid") || msg.includes("api key")) {
                 statusCode = 401; // Unauthorized
                 errorMessage = "The request could not be authenticated. Please check service credentials.";
             } else if (msg.includes("quota")) {
@@ -56,6 +51,7 @@ function handleApiError(error: unknown): HandlerResponse {
 
     return {
         statusCode: statusCode,
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ error: errorMessage }),
     };
 }
@@ -73,14 +69,26 @@ const handler: Handler = async (event: HandlerEvent): Promise<HandlerResponse> =
         const body = JSON.parse(event.body || '{}');
         const { action } = body;
 
+        let response;
         switch (action) {
             case 'generateReport':
-                return await handleGenerateReport(aiClient, body);
+                response = await handleGenerateReport(aiClient, body);
+                break;
             case 'reviseAnswer':
-                return await handleReviseAnswer(aiClient, body);
+                response = await handleReviseAnswer(aiClient, body);
+                break;
             default:
-                return { statusCode: 400, body: JSON.stringify({ error: 'Invalid action specified.' }) };
+                response = { statusCode: 400, body: JSON.stringify({ error: 'Invalid action specified.' }) };
+                break;
         }
+        
+        // Ensure all successful responses have the correct content type.
+        if (!response.headers) {
+          response.headers = {};
+        }
+        response.headers['Content-Type'] = 'application/json';
+        return response;
+
     } catch (error) {
         return handleApiError(error);
     }
