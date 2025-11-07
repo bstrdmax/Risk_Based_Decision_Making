@@ -64,7 +64,6 @@ const handler: Handler = async (event: HandlerEvent): Promise<HandlerResponse> =
         return { statusCode: 405, body: 'Method Not Allowed' };
     }
 
-    // Directly access the environment variable. Fail fast with a clear error if it's missing.
     const apiKey = process.env.GEMINI_SECRET_KEY;
     if (!apiKey) {
         console.error("FATAL: GEMINI_SECRET_KEY environment variable not set.");
@@ -80,7 +79,7 @@ const handler: Handler = async (event: HandlerEvent): Promise<HandlerResponse> =
         const body = JSON.parse(event.body || '{}');
         const { action } = body;
 
-        let response;
+        let response: HandlerResponse;
         switch (action) {
             case 'generateReport':
                 response = await handleGenerateReport(ai, body);
@@ -89,36 +88,32 @@ const handler: Handler = async (event: HandlerEvent): Promise<HandlerResponse> =
                 response = await handleReviseAnswer(ai, body);
                 break;
             default:
-                return { statusCode: 400, body: JSON.stringify({ error: 'Invalid action specified.' }) };
+                return { 
+                    statusCode: 400, 
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ error: 'Invalid action specified.' }) 
+                };
         }
         
         response.headers = { ...response.headers, 'Content-Type': 'application/json' };
         return response;
 
     } catch (error) {
-        console.error("Error in Netlify function:", JSON.stringify(error, null, 2));
+        console.error("Gemini function execution error:", error);
+        
+        const errorMessage = error instanceof Error ? error.message : "An unknown internal error occurred.";
 
-        let errorMessage = "An unexpected server error occurred.";
-        let statusCode = 500;
-
-        if (error instanceof Error) {
-            errorMessage = error.message;
-            // Try to infer status code from common error messages for more accurate client-side handling
-            const msg = error.message.toLowerCase();
-            if (msg.includes("permission") || msg.includes("denied") || msg.includes("api key not valid")) {
-                statusCode = 401;
-            } else if (msg.includes("quota")) {
-                statusCode = 429;
-            } else if (error.name === 'SyntaxError') { // From JSON.parse
-                statusCode = 400;
-                errorMessage = "Invalid request format."
-            }
+        let friendlyMessage = `Failed to communicate with the AI model for the final report. Details: ${errorMessage}`;
+        if (errorMessage.toLowerCase().includes("api key not valid")) {
+            friendlyMessage = "The server's API key is invalid. Please check the Netlify environment variables.";
+        } else if (errorMessage.toLowerCase().includes("permission denied")) {
+             friendlyMessage = "An API permission error occurred. The Google Search tool may not be enabled for your API key in your Google Cloud project.";
         }
-    
+
         return {
-            statusCode: statusCode,
+            statusCode: 500,
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ error: errorMessage }),
+            body: JSON.stringify({ error: friendlyMessage }),
         };
     }
 };
