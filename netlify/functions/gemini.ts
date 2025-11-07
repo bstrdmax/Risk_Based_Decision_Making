@@ -104,7 +104,7 @@ async function handleGenerateReport(ai: GoogleGenAI, body: any): Promise<Handler
     }
 
     const response = await ai.models.generateContent({
-        model: 'gemini-2.5-pro',
+        model: 'gemini-2.5-flash',
         contents: prompt,
         config: {
             systemInstruction: SYSTEM_PROMPT,
