@@ -11,7 +11,7 @@
  * @throws An error if the API key is not configured on the server.
  */
 export function getApiKey(): string {
-    const apiKey = process.env.API_KEY;
+    const apiKey = process.env.GEMINI_SECRET_KEY;
 
     if (!apiKey) {
         // Throw a specific, non-descriptive error to be caught by the generic error handler.
