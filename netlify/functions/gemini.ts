@@ -12,7 +12,7 @@ const handler: Handler = async (event: HandlerEvent) => {
     // Ensure the API key is set in Netlify's environment variables
     if (!process.env.API_KEY) {
         console.error("API_KEY environment variable not set.");
-        return { statusCode: 500, body: JSON.stringify({ error: "Server configuration error: Missing API key." }) };
+        return { statusCode: 500, body: JSON.stringify({ error: "Server configuration error: Missing API key. Please set the API_KEY environment variable in your Netlify site settings." }) };
     }
 
     // Initialize the Gemini client
@@ -33,9 +33,28 @@ const handler: Handler = async (event: HandlerEvent) => {
         }
     } catch (error) {
         console.error("Error in Netlify function:", error);
+        
+        let errorMessage = "An internal error occurred while communicating with the AI model.";
+        let statusCode = 500;
+
+        if (error instanceof Error && error.message) {
+            const lowerCaseMessage = error.message.toLowerCase();
+            // Check for specific error messages related to API keys from Google's API
+            if (lowerCaseMessage.includes('api key not valid')) {
+                errorMessage = "The provided API key is not valid. Please check your API_KEY in the Netlify environment variables and ensure it is correct.";
+                statusCode = 401; // Unauthorized
+            } else if (lowerCaseMessage.includes('permission denied') || lowerCaseMessage.includes('gemini api has not been used')) {
+                errorMessage = "The API key is missing required permissions or the Gemini API has not been enabled for your project. Please check your Google Cloud project settings.";
+                statusCode = 403; // Forbidden
+            } else if (lowerCaseMessage.includes('quota')) {
+                errorMessage = "API quota exceeded. Please check your Google Cloud billing account or API usage limits.";
+                statusCode = 429; // Too Many Requests
+            }
+        }
+        
         return {
-            statusCode: 500,
-            body: JSON.stringify({ error: "An internal error occurred while communicating with the AI model." }),
+            statusCode: statusCode,
+            body: JSON.stringify({ error: errorMessage }),
         };
     }
 };
