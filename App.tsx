@@ -17,14 +17,17 @@ const LOADING_MESSAGES = [
   "Almost there, finalizing your report...",
 ];
 
+type View = 'welcome' | 'form' | 'report' | 'loading';
+
 const App: React.FC = () => {
-  const [view, setView] = useState<'welcome' | 'form' | 'report' | 'loading'>('welcome');
+  const [view, setView] = useState<View>('welcome');
   const [answers, setAnswers] = useState<string[]>(Array(QUESTIONS.length).fill(''));
   const [reportData, setReportData] = useState<ReportResult | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [revisionLoading, setRevisionLoading] = useState<Record<number, boolean>>({});
   const [currentStep, setCurrentStep] = useState(0);
   const [loadingMessageIndex, setLoadingMessageIndex] = useState(0);
+  const [isExiting, setIsExiting] = useState(false);
 
   useEffect(() => {
     let interval: ReturnType<typeof setInterval>;
@@ -36,6 +39,14 @@ const App: React.FC = () => {
     return () => clearInterval(interval);
   }, [view]);
 
+  const changeView = (newView: View) => {
+    setIsExiting(true);
+    setTimeout(() => {
+      setView(newView);
+      setIsExiting(false);
+    }, 300); // Match animation duration
+  };
+
   const handleAnswerChange = (index: number, value: string) => {
     const newAnswers = [...answers];
     newAnswers[index] = value;
@@ -43,7 +54,7 @@ const App: React.FC = () => {
   };
   
   const handleStart = () => {
-    setView('form');
+    changeView('form');
   };
 
   const handleNext = () => {
@@ -63,7 +74,7 @@ const App: React.FC = () => {
     setReportData(null);
     setError(null);
     setCurrentStep(0);
-    setView('welcome');
+    changeView('welcome');
   };
 
   const handleReviseAnswer = async (index: number) => {
@@ -98,7 +109,7 @@ const App: React.FC = () => {
       setError("Please answer all questions before generating the report.");
       return;
     }
-    setView('loading');
+    changeView('loading');
     setError(null);
     try {
       const fullContext = answers
@@ -109,11 +120,11 @@ const App: React.FC = () => {
       
       const finalReportData = await generateFinalReport(finalPrompt);
       setReportData(finalReportData);
-      setView('report');
+      changeView('report');
     } catch (e) {
       const errorMessage = e instanceof Error ? e.message : 'An unknown error occurred.';
       setError(`Error generating report: ${errorMessage}`);
-      setView('form');
+      changeView('form');
     }
   };
 
@@ -144,6 +155,7 @@ const App: React.FC = () => {
             onNext={handleNext}
             onBack={handleBack}
             onSubmit={handleGenerateReport}
+            onReset={handleReset}
             revisionLoading={revisionLoading}
             error={error}
           />
@@ -155,7 +167,9 @@ const App: React.FC = () => {
     <div className="flex flex-col h-screen font-sans antialiased text-slate-800 dark:text-slate-200 bg-slate-50 dark:bg-slate-950">
       <Header />
       <main className="flex-1 overflow-y-auto flex flex-col">
-        {renderContent()}
+         <div className={`transition-opacity duration-300 ${isExiting ? 'opacity-0' : 'opacity-100'}`}>
+            {renderContent()}
+         </div>
       </main>
     </div>
   );
