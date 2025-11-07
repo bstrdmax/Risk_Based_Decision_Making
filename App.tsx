@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { generateFinalReport } from './services/geminiService';
+import { generateFinalReport, reviseAnswer } from './services/geminiService';
 import { QUESTIONS } from './constants';
 import Header from './components/Header';
 import DecisionForm from './components/DecisionForm';
@@ -29,7 +29,7 @@ const App: React.FC = () => {
 
   const handleBack = () => {
     if (currentStep > 0) {
-      setCurrentStep(currentStep - 1);
+      setCurrentStep(currentStep + 1);
     }
   };
 
@@ -57,7 +57,6 @@ const App: React.FC = () => {
         return;
       }
 
-      const { reviseAnswer } = await import('./services/geminiService');
       const revisedText = await reviseAnswer(question, context, userAnswer);
       handleAnswerChange(index, revisedText);
 
