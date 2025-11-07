@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { generateFinalReport, reviseAnswer } from './services/geminiService';
 import { QUESTIONS } from './constants';
 import Header from './components/Header';
@@ -7,6 +7,15 @@ import ReportView from './components/ReportView';
 import SpinnerIcon from './components/icons/SpinnerIcon';
 import { ReportResult } from './services/geminiService';
 
+const LOADING_MESSAGES = [
+  "Analyzing context and decision parameters...",
+  "Consulting GAO Greenbook and OMB A-123 standards...",
+  "Identifying potential risks and opportunities...",
+  "Cross-referencing data for grounding...",
+  "Structuring the final assessment document...",
+  "Almost there, finalizing your report...",
+];
+
 const App: React.FC = () => {
   const [view, setView] = useState<'form' | 'report' | 'loading'>('form');
   const [answers, setAnswers] = useState<string[]>(Array(QUESTIONS.length).fill(''));
@@ -14,6 +23,18 @@ const App: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [revisionLoading, setRevisionLoading] = useState<Record<number, boolean>>({});
   const [currentStep, setCurrentStep] = useState(0);
+  const [loadingMessageIndex, setLoadingMessageIndex] = useState(0);
+
+  useEffect(() => {
+    // FIX: In a browser environment, `setInterval` returns a `number`. `NodeJS.Timeout` is for Node.js.
+    let interval: number;
+    if (view === 'loading') {
+      interval = setInterval(() => {
+        setLoadingMessageIndex((prevIndex) => (prevIndex + 1) % LOADING_MESSAGES.length);
+      }, 2500);
+    }
+    return () => clearInterval(interval);
+  }, [view]);
 
   const handleAnswerChange = (index: number, value: string) => {
     const newAnswers = [...answers];
@@ -97,9 +118,11 @@ const App: React.FC = () => {
       case 'loading':
         return (
           <div className="flex-1 flex flex-col items-center justify-center text-center p-8">
-            <SpinnerIcon />
-            <h2 className="text-2xl font-semibold mt-4 text-gray-700 dark:text-gray-300">Generating Your Assessment</h2>
-            <p className="text-gray-500 dark:text-gray-400 mt-2">The AI is analyzing your responses and consulting sources. This may take a moment...</p>
+            <div className="text-blue-600 w-16 h-16">
+              <SpinnerIcon />
+            </div>
+            <h2 className="text-2xl font-semibold mt-6 text-slate-800 dark:text-slate-200">Generating Your Assessment</h2>
+            <p className="text-slate-500 dark:text-slate-400 mt-2 transition-opacity duration-500">{LOADING_MESSAGES[loadingMessageIndex]}</p>
           </div>
         );
       case 'report':
@@ -123,9 +146,9 @@ const App: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col h-screen font-sans antialiased text-gray-800 dark:text-gray-200">
+    <div className="flex flex-col h-screen font-sans antialiased text-slate-800 dark:text-slate-200 bg-slate-50 dark:bg-slate-950">
       <Header />
-      <main className="flex-1 overflow-y-auto">
+      <main className="flex-1 overflow-y-auto flex flex-col">
         {renderContent()}
       </main>
     </div>
