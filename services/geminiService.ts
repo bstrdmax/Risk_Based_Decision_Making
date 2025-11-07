@@ -27,8 +27,15 @@ const callApiProxy = async (body: object) => {
     });
 
     if (!response.ok) {
-        const errorData = await response.json().catch(() => ({ error: 'Failed to parse error response from the server.' }));
-        throw new Error(errorData.error || `Server request failed with status ${response.status}`);
+        let errorBody;
+        try {
+            errorBody = await response.json();
+        } catch (e) {
+            // This catch block is crucial. It handles cases like a 502 timeout from Netlify
+            // where the response is not valid JSON.
+            throw new Error(`The server returned an invalid response (Status: ${response.status}). This may be due to a function timeout if the report is complex. Please try again or simplify your inputs.`);
+        }
+        throw new Error(errorBody.error || `Server request failed with status ${response.status}`);
     }
 
     return response.json();
