@@ -14,10 +14,10 @@ export interface ReportResult {
     sources: GroundingChunk[];
 }
 
-// Per user instruction, use GEMINI_SECRET_KEY. The platform provides this.
-const apiKey = process.env.GEMINI_SECRET_KEY;
+// The platform provides the API key for client-side code via process.env.API_KEY.
+const apiKey = process.env.API_KEY;
 if (!apiKey) {
-    throw new Error("GEMINI_SECRET_KEY environment variable not set.");
+    throw new Error("API_KEY environment variable not set.");
 }
 const ai = new GoogleGenAI({ apiKey });
 
@@ -32,7 +32,7 @@ export const generateFinalReport = async (prompt: string): Promise<ReportResult>
             },
         });
 
-        const report = response.text;
+        const report = response.text ?? '';
         const sources = (response.candidates?.[0]?.groundingMetadata?.groundingChunks as GroundingChunk[]) ?? [];
 
         return { report, sources };
@@ -64,7 +64,7 @@ export const reviseAnswer = async (question: string, context: string, userAnswer
             },
         });
 
-        return response.text;
+        return response.text ?? '';
 
     } catch (error) {
         console.error("Error revising answer:", error);
