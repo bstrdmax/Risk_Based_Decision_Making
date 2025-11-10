@@ -1,3 +1,6 @@
+import { GoogleGenAI } from "@google/genai";
+import { SYSTEM_PROMPT, REVISION_SYSTEM_PROMPT } from '../constants';
+
 // These types are used by other components, so we keep them.
 interface GroundingChunk {
     web: {
@@ -11,50 +14,69 @@ export interface ReportResult {
     sources: GroundingChunk[];
 }
 
+// Per user instruction, use GEMINI_SECRET_KEY. The platform provides this.
+const apiKey = process.env.GEMINI_SECRET_KEY;
+if (!apiKey) {
+    throw new Error("GEMINI_SECRET_KEY environment variable not set.");
+}
+const ai = new GoogleGenAI({ apiKey });
+
 export const generateFinalReport = async (prompt: string): Promise<ReportResult> => {
     try {
-        const response = await fetch('/.netlify/functions/gemini', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ action: 'generateReport', prompt }),
+        const response = await ai.models.generateContent({
+            model: 'gemini-2.5-flash',
+            contents: prompt,
+            config: {
+                systemInstruction: SYSTEM_PROMPT,
+                tools: [{ googleSearch: {} }],
+            },
         });
 
-        if (!response.ok) {
-            const errorData = await response.json().catch(() => ({ error: 'An unknown server error occurred.' }));
-            throw new Error(errorData.error || `Server responded with status: ${response.status}`);
-        }
+        const report = response.text;
+        const sources = (response.candidates?.[0]?.groundingMetadata?.groundingChunks as GroundingChunk[]) ?? [];
 
-        const data = await response.json();
-        return data as ReportResult;
+        return { report, sources };
     } catch (error) {
         console.error("Error generating final report:", error);
+        if (error instanceof Error) {
+            let friendlyMessage = `Failed to communicate with the AI model. Details: ${error.message}`;
+            if (error.message.toLowerCase().includes("api key not valid")) {
+                friendlyMessage = "The API key is invalid. Please check the environment variables.";
+            } else if (error.message.toLowerCase().includes("permission denied")) {
+                 friendlyMessage = "An API permission error occurred. The Google Search tool may not be enabled for your API key in your Google Cloud project, or your key may have incorrect referrer restrictions.";
+            }
+            throw new Error(friendlyMessage);
+        }
         throw error;
     }
 };
 
 export const reviseAnswer = async (question: string, context: string, userAnswer: string): Promise<string> => {
     try {
-        const response = await fetch('/.netlify/functions/gemini', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                action: 'reviseAnswer',
-                question,
-                context,
-                userAnswer,
-            }),
+        const fullPrompt = `Here is the context from my previous answers:\n${context || 'No context yet.'}\n\nQuestion being answered: "${question}"\n\nHere is the user's current answer that needs revision:\n"${userAnswer}"`;
+        
+        const response = await ai.models.generateContent({
+            model: 'gemini-2.5-flash',
+            contents: fullPrompt,
+            config: {
+                systemInstruction: REVISION_SYSTEM_PROMPT,
+                temperature: 0.6,
+            },
         });
-        
-        if (!response.ok) {
-            const errorData = await response.json().catch(() => ({ error: 'An unknown server error occurred.' }));
-            throw new Error(errorData.error || `Server responded with status: ${response.status}`);
-        }
-        
-        const data = await response.json();
-        return data.revisedText;
+
+        return response.text;
 
     } catch (error) {
         console.error("Error revising answer:", error);
+        if (error instanceof Error) {
+            let friendlyMessage = `Failed to communicate with the AI model. Details: ${error.message}`;
+             if (error.message.toLowerCase().includes("api key not valid")) {
+                friendlyMessage = "The API key is invalid. Please check the environment variables.";
+            } else if (error.message.toLowerCase().includes("permission denied")) {
+                 friendlyMessage = "An API permission error occurred. This can happen if your key has incorrect referrer restrictions.";
+            }
+            throw new Error(friendlyMessage);
+        }
         throw error;
     }
 };
