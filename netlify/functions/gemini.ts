@@ -101,14 +101,14 @@ const handler: Handler = async (event: HandlerEvent): Promise<HandlerResponse> =
     } catch (error) {
         console.error("Gemini function execution error:", error);
         
-        const errorMessage = error instanceof Error ? error.message : "An unknown internal error occurred.";
+        const originalErrorMessage = error instanceof Error ? error.message : "An unknown internal error occurred.";
 
-        let friendlyMessage = `Failed to communicate with the AI model. Details: ${errorMessage}`;
-        if (errorMessage.toLowerCase().includes("api key not valid")) {
-            friendlyMessage = "The server's API key is invalid. Please check the Netlify environment variables.";
-        } else if (errorMessage.toLowerCase().includes("permission denied")) {
-             friendlyMessage = "An API permission error occurred. The Google Search tool may not be enabled for your API key in your Google Cloud project.";
-        } else if (errorMessage.toLowerCase().includes("requested entity was not found")) {
+        let friendlyMessage = `An unexpected error occurred while communicating with the AI. Please check the server logs in your Netlify dashboard for more details.`;
+        if (originalErrorMessage.toLowerCase().includes("api key not valid")) {
+            friendlyMessage = "The server's API key is invalid. Please double-check the GEMINI_SECRET_KEY in your Netlify environment variables and trigger a new deploy.";
+        } else if (originalErrorMessage.toLowerCase().includes("permission denied")) {
+             friendlyMessage = "An API permission error occurred. This often means the 'Vertex AI API' is not enabled for this key in your Google Cloud project, or your project is not linked to a billing account.";
+        } else if (originalErrorMessage.toLowerCase().includes("requested entity was not found")) {
              friendlyMessage = "An API permission error occurred. This can happen if the API key is invalid or does not have the necessary permissions enabled in your Google Cloud project.";
         }
 
@@ -116,7 +116,7 @@ const handler: Handler = async (event: HandlerEvent): Promise<HandlerResponse> =
         return {
             statusCode: 500,
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ error: friendlyMessage }),
+            body: JSON.stringify({ error: friendlyMessage, originalError: originalErrorMessage }),
         };
     }
 };
