@@ -64,9 +64,9 @@ const handler: Handler = async (event: HandlerEvent): Promise<HandlerResponse> =
         return { statusCode: 405, body: 'Method Not Allowed' };
     }
 
-    const apiKey = process.env.API_KEY;
+    const apiKey = process.env.GEMINI_SECRET_KEY;
     if (!apiKey) {
-        console.error("FATAL: API_KEY environment variable not set.");
+        console.error("FATAL: GEMINI_SECRET_KEY environment variable not set.");
         return {
             statusCode: 500,
             headers: { 'Content-Type': 'application/json' },
