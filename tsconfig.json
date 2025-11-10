@@ -26,7 +26,8 @@
     "constants.ts",
     "types.ts",
     "components/**/*.tsx",
-    "services/**/*.ts"
+    "services/**/*.ts",
+    "netlify/functions/**/*.ts"
   ],
   "references": [{ "path": "./tsconfig.node.json" }]
 }
