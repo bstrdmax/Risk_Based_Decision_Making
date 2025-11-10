@@ -64,9 +64,9 @@ const handler: Handler = async (event: HandlerEvent): Promise<HandlerResponse> =
         return { statusCode: 405, body: 'Method Not Allowed' };
     }
 
-    const apiKey = process.env.GEMINI_SECRET_KEY;
+    const apiKey = process.env.API_KEY;
     if (!apiKey) {
-        console.error("FATAL: GEMINI_SECRET_KEY environment variable not set.");
+        console.error("FATAL: API_KEY environment variable not set.");
         return {
             statusCode: 500,
             headers: { 'Content-Type': 'application/json' },
@@ -103,12 +103,15 @@ const handler: Handler = async (event: HandlerEvent): Promise<HandlerResponse> =
         
         const errorMessage = error instanceof Error ? error.message : "An unknown internal error occurred.";
 
-        let friendlyMessage = `Failed to communicate with the AI model for the final report. Details: ${errorMessage}`;
+        let friendlyMessage = `Failed to communicate with the AI model. Details: ${errorMessage}`;
         if (errorMessage.toLowerCase().includes("api key not valid")) {
             friendlyMessage = "The server's API key is invalid. Please check the Netlify environment variables.";
         } else if (errorMessage.toLowerCase().includes("permission denied")) {
              friendlyMessage = "An API permission error occurred. The Google Search tool may not be enabled for your API key in your Google Cloud project.";
+        } else if (errorMessage.toLowerCase().includes("requested entity was not found")) {
+             friendlyMessage = "An API permission error occurred. This can happen if the API key is invalid or does not have the necessary permissions enabled in your Google Cloud project.";
         }
+
 
         return {
             statusCode: 500,
