@@ -6,7 +6,7 @@ import DecisionForm from './components/DecisionForm';
 import ReportView from './components/ReportView';
 import SpinnerIcon from './components/icons/SpinnerIcon';
 import WelcomeView from './components/WelcomeView';
-import { ReportResult } from './services/geminiService';
+import { ReportResult } from './types';
 
 const LOADING_MESSAGES = [
   "Analyzing context and decision parameters...",
