@@ -1,5 +1,7 @@
 /** @type {import('tailwindcss').Config} */
 import typography from '@tailwindcss/typography';
+import { createRequire } from 'module';
+const require = createRequire(import.meta.url);
 
 export default {
   content: [
