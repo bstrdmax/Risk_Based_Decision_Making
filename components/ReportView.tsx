@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ReportResult } from '../services/geminiService';
+import { ReportResult } from '../types';
 import MarkdownRenderer from './MarkdownRenderer';
 import CopyIcon from './icons/CopyIcon';
 import DownloadIcon from './icons/DownloadIcon';
