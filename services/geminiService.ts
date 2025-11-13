@@ -1,15 +1,4 @@
-// These types are used by other components, so we keep them.
-interface GroundingChunk {
-    web: {
-        uri: string;
-        title: string;
-    }
-}
-
-export interface ReportResult {
-    report: string;
-    sources: GroundingChunk[];
-}
+import { ReportResult } from '../types';
 
 /**
  * A helper function to handle API responses from our Netlify function.
