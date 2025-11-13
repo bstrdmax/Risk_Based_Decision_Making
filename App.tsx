@@ -10,7 +10,7 @@ import { ReportResult } from './services/geminiService';
 
 const LOADING_MESSAGES = [
   "Analyzing context and decision parameters...",
-  "Consulting GAO Greenbook and OMB A-123 standards...",
+  "Consulting GAO Greenbook, OMB A-123, OIG reports, and VA/VHA policies...",
   "Identifying potential risks and opportunities...",
   "Cross-referencing data for grounding...",
   "Structuring the final assessment document...",
