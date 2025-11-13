@@ -12,7 +12,7 @@ async function handleGenerateReport(ai: GoogleGenAI, body: any): Promise<Handler
     }
 
     const response = await ai.models.generateContent({
-        model: 'gemini-2.5-flash',
+        model: 'gemini-2.5-pro',
         contents: prompt,
         config: {
             systemInstruction: SYSTEM_PROMPT,
@@ -120,5 +120,3 @@ const handler: Handler = async (event: HandlerEvent): Promise<HandlerResponse> =
         };
     }
 };
-
-export { handler };
