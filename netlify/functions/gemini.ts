@@ -1,8 +1,7 @@
-
-
 import { GoogleGenAI } from "@google/genai";
 import type { Handler, HandlerEvent, HandlerResponse } from "@netlify/functions";
 import { SYSTEM_PROMPT, REVISION_SYSTEM_PROMPT } from '../../constants';
+import { GroundingChunk } from "../../types";
 
 /**
  * Handles the logic for generating the final report.
@@ -25,7 +24,7 @@ async function handleGenerateReport(ai: GoogleGenAI, body: any): Promise<Handler
 
     const report = response.text;
     // Since googleSearch is disabled, there will be no grounding sources.
-    const sources = [];
+    const sources: GroundingChunk[] = [];
     
     return {
         statusCode: 200,
