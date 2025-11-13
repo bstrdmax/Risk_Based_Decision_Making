@@ -29,7 +29,7 @@ const WelcomeView: React.FC<WelcomeViewProps> = ({ onStart }) => {
           AI Risk-Based Decision Assistant
         </h1>
         <p className="max-w-3xl mx-auto mt-4 text-lg text-slate-600 dark:text-slate-400">
-          Make informed, data-driven decisions. Our AI grounds its analysis in OIG recommendations, GAO findings, VA/VHA policies, and relevant legislation to provide a comprehensive risk assessment.
+          Make informed, data-driven decisions. Our AI grounds its analysis in foundational standards like the GAO Greenbook and OMB Circular A-123, along with OIG recommendations, GAO findings, VA/VHA policies, and relevant legislation to provide a comprehensive risk assessment.
         </p>
         <div className="mt-10">
           <button
