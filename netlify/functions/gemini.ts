@@ -13,7 +13,7 @@ async function handleGenerateReport(ai: GoogleGenAI, body: any): Promise<Handler
     }
 
     const response = await ai.models.generateContent({
-        model: 'gemini-2.5-pro',
+        model: 'gemini-2.5-flash',
         contents: prompt,
         config: {
             systemInstruction: SYSTEM_PROMPT,
@@ -118,5 +118,4 @@ export const handler: Handler = async (event: HandlerEvent): Promise<HandlerResp
             statusCode: 500,
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ error: friendlyMessage, originalError: originalErrorMessage }),
-        };
-    }}
+        };}};
