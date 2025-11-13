@@ -1,3 +1,4 @@
+
 import { GoogleGenAI } from "@google/genai";
 import type { Handler, HandlerEvent, HandlerResponse } from "@netlify/functions";
 import { SYSTEM_PROMPT, REVISION_SYSTEM_PROMPT } from '../../constants';
@@ -59,7 +60,7 @@ async function handleReviseAnswer(ai: GoogleGenAI, body: any): Promise<HandlerRe
 /**
  * Main handler for the serverless function.
  */
-const handler: Handler = async (event: HandlerEvent): Promise<HandlerResponse> => {
+export const handler: Handler = async (event: HandlerEvent): Promise<HandlerResponse> => {
     if (event.httpMethod !== 'POST') {
         return { statusCode: 405, body: 'Method Not Allowed' };
     }
@@ -118,5 +119,4 @@ const handler: Handler = async (event: HandlerEvent): Promise<HandlerResponse> =
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ error: friendlyMessage, originalError: originalErrorMessage }),
         };
-    }
-};
+    }}
