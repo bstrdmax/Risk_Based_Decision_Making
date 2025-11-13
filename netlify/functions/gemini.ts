@@ -1,4 +1,5 @@
 
+
 import { GoogleGenAI } from "@google/genai";
 import type { Handler, HandlerEvent, HandlerResponse } from "@netlify/functions";
 import { SYSTEM_PROMPT, REVISION_SYSTEM_PROMPT } from '../../constants';
@@ -17,12 +18,14 @@ async function handleGenerateReport(ai: GoogleGenAI, body: any): Promise<Handler
         contents: prompt,
         config: {
             systemInstruction: SYSTEM_PROMPT,
-            tools: [{ googleSearch: {} }],
+            // The 'tools' property with googleSearch has been removed to ensure the function
+            // completes within Netlify's 10-second timeout limit.
         },
     });
 
     const report = response.text;
-    const sources = response.candidates?.[0]?.groundingMetadata?.groundingChunks ?? [];
+    // Since googleSearch is disabled, there will be no grounding sources.
+    const sources = [];
     
     return {
         statusCode: 200,
@@ -118,4 +121,6 @@ export const handler: Handler = async (event: HandlerEvent): Promise<HandlerResp
             statusCode: 500,
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ error: friendlyMessage, originalError: originalErrorMessage }),
-        };}};
+        };
+    }
+};
